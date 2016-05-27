@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>7</daysToKeep>
+    <numToKeep>10</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>macosx</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <jenkins.triggers.ReverseBuildTrigger>
+      <spec></spec>
+      <upstreamProjects>0-alpha-release</upstreamProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </jenkins.triggers.ReverseBuildTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cat - &gt; /tmp/build_macosx &lt;&lt; EOF
+#!/bin/bash
+set -v -e
+rm -Rf /tmp/alpha_release* /tmp/stable_release* /tmp/build_macosx
+export PATH=$PATH:/usr/local/bin
+export DIST=macosx
+mkdir -p /tmp/mdsplus/deploy
+wget  -O /tmp/mdsplus/deploy/release.py https://github.com/MDSplus/mdsplus/raw/alpha/deploy/release.py
+wget  -O /tmp/mdsplus/deploy/get_latest_release https://github.com/MDSplus/mdsplus/raw/alpha/deploy/get_latest_release
+chmod a+rx /tmp/mdsplus/deploy/get_latest_release
+python /tmp/mdsplus/deploy/release.py deploy
+EOF
+chmod a+x /tmp/build_macosx
+sudo -E /tmp/build_macosx</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.17">
+      <recipients>mdsplus_git@psfc.mit.edu</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@1.0.0">
+      <token>GotG4z2bNkyPVwnn9cdYxClaIdKnatNUudiN87M0</token>
+      <room>2361558</room>
+      <notifications/>
+      <startJobMessage></startJobMessage>
+      <completeJobMessage></completeJobMessage>
+    </jenkins.plugins.hipchat.HipChatNotifier>
+  </publishers>
+  <buildWrappers/>
+</project>

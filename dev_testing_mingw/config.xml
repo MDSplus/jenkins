@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This project is used to make tests on tap results...</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/MDSplus/mdsplus.git</url>
+        <credentialsId>bad4077f-1b85-4e12-9d6c-81bdd04ee3c2</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/alpha</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>source</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+    </extensions>
+  </scm>
+  <assignedNode>docker</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>function _do {
+# access build_redhat_tests from path
+export PATH=${WORKSPACE}/source/deploy:${PATH}
+
+# make build directories
+rm -rf ${WORKSPACE}/build_32;
+rm -rf ${WORKSPACE}/build_64;
+mkdir -p ${WORKSPACE}/build_32;
+mkdir -p ${WORKSPACE}/build_64;
+mkdir -p ${WORKSPACE}/buildroot;
+
+export JDK_DIR=/etc/alternatives/java_sdk_openjdk
+export DOCKER_IMAGE=mdsplus/docker:build_windows
+
+# select here the active valgrind tools
+# export VALGRIND_TOOLS=memcheck
+
+# build tests in build_32
+{
+ cd ${WORKSPACE}/build_32;
+ build_mdsplus_tests --prefix ${WORKSPACE}/buildroot build_tests --enable-debug=yes --host=i686-w64-mingw32
+}
+
+
+# build tests in build_64
+{
+ cd ${WORKSPACE}/build_64;
+ build_mdsplus_tests --prefix ${WORKSPACE}/buildroot build_tests --enable-debug=yes --host=x86_64-w64-mingw32
+}
+
+}
+
+_do
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.26-SNAPSHOT">
+      <valgrindPublisherConfig>
+        <pattern>build_64/mdsobjects/python/tests/*.xml,build_64/mdslib/testing/*.xml,build_64/mdsobjects/cpp/testing/*.xml,build_32/mdsobjects/python/tests/*.xml,build_32/mdslib/testing/*.xml,build_32/mdsobjects/cpp/testing/*.xml</pattern>
+        <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>
+        <failThresholdDefinitelyLost></failThresholdDefinitelyLost>
+        <failThresholdTotal></failThresholdTotal>
+        <unstableThresholdInvalidReadWrite></unstableThresholdInvalidReadWrite>
+        <unstableThresholdDefinitelyLost></unstableThresholdDefinitelyLost>
+        <unstableThresholdTotal></unstableThresholdTotal>
+        <publishResultsForAbortedBuilds>false</publishResultsForAbortedBuilds>
+        <publishResultsForFailedBuilds>false</publishResultsForFailedBuilds>
+        <failBuildOnMissingReports>false</failBuildOnMissingReports>
+        <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
+      </valgrindPublisherConfig>
+    </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
+    <org.tap4j.plugin.TapPublisher plugin="tap@1.24">
+      <testResults>build_64/mdsobjects/python/tests/test-suite.tap,build_64/mdslib/testing/test-suite.tap,build_64/mdsobjects/cpp/testing/test-suite.tap,build_32/mdsobjects/python/tests/test-suite.tap,build_32/mdslib/testing/test-suite.tap,build_32/mdsobjects/cpp/testing/test-suite.tap</testResults>
+      <failIfNoResults>false</failIfNoResults>
+      <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
+      <outputTapToConsole>true</outputTapToConsole>
+      <enableSubtests>true</enableSubtests>
+      <discardOldReports>true</discardOldReports>
+      <todoIsFailure>false</todoIsFailure>
+      <includeCommentDiagnostics>true</includeCommentDiagnostics>
+      <validateNumberOfTests>false</validateNumberOfTests>
+      <planRequired>false</planRequired>
+      <verbose>true</verbose>
+    </org.tap4j.plugin.TapPublisher>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.2">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
+</project>
