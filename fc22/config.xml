@@ -77,6 +77,21 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$(($(stat -c %i .) % 256 + 
         <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
       </valgrindPublisherConfig>
     </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@1.0.0">
+      <token></token>
+      <room>2361558</room>
+      <notifications>
+        <jenkins.plugins.hipchat.model.NotificationConfig>
+          <notifyEnabled>true</notifyEnabled>
+          <textFormat>false</textFormat>
+          <notificationType>FAILURE</notificationType>
+          <color>RED</color>
+          <messageTemplate></messageTemplate>
+        </jenkins.plugins.hipchat.model.NotificationConfig>
+      </notifications>
+      <startJobMessage></startJobMessage>
+      <completeJobMessage></completeJobMessage>
+    </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
     <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.29">

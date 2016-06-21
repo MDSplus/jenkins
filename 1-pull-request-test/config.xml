@@ -3,50 +3,50 @@
   <actions/>
   <description></description>
   <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>1</daysToKeep>
-    <numToKeep>1</numToKeep>
+    <daysToKeep>3</daysToKeep>
+    <numToKeep>3</numToKeep>
     <artifactDaysToKeep>-1</artifactDaysToKeep>
     <artifactNumToKeep>-1</artifactNumToKeep>
   </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.19.1">
-      <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
+      <projectUrl>https://github.com/MDSplus/mdsplus/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>sha1</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
   </properties>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.4">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <refspec>+refs/heads/alpha:refs/remotes/origin/alpha</refspec>
+        <refspec>+refs/pull/*:refs/remotes/origin/pr/*</refspec>
         <url>git@github.com:/MDSplus/mdsplus.git</url>
         <credentialsId>185dc1e4-4bc4-4b12-a855-1306bf21d351</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>alpha</name>
+        <name>${sha1}</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
     <submoduleCfg class="list"/>
     <extensions>
-      <hudson.plugins.git.extensions.impl.CloneOption>
-        <shallow>true</shallow>
-        <noTags>false</noTags>
-        <reference></reference>
-        <depth>0</depth>
-      </hudson.plugins.git.extensions.impl.CloneOption>
       <hudson.plugins.git.extensions.impl.SubmoduleOption>
         <disableSubmodules>false</disableSubmodules>
         <recursiveSubmodules>true</recursiveSubmodules>
         <trackingSubmodules>false</trackingSubmodules>
         <reference></reference>
       </hudson.plugins.git.extensions.impl.SubmoduleOption>
-      <hudson.plugins.git.extensions.impl.LocalBranch>
-        <localBranch>alpha</localBranch>
-      </hudson.plugins.git.extensions.impl.LocalBranch>
     </extensions>
   </scm>
   <assignedNode>docker</assignedNode>
@@ -55,15 +55,66 @@
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <hudson.triggers.TimerTrigger>
-      <spec>H 18 * * *</spec>
-    </hudson.triggers.TimerTrigger>
+    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.32.4">
+      <spec>H/5 * * * *</spec>
+      <latestVersion>3</latestVersion>
+      <configVersion>3</configVersion>
+      <adminlist>tfredian</adminlist>
+      <allowMembersOfWhitelistedOrgsAsAdmin>true</allowMembersOfWhitelistedOrgsAsAdmin>
+      <orgslist>MDSplus</orgslist>
+      <cron>H/5 * * * *</cron>
+      <buildDescTemplate></buildDescTemplate>
+      <onlyTriggerPhrase>false</onlyTriggerPhrase>
+      <useGitHubHooks>true</useGitHubHooks>
+      <permitAll>false</permitAll>
+      <whitelist>zack-vii</whitelist>
+      <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+      <displayBuildErrorsOnDownstreamBuilds>false</displayBuildErrorsOnDownstreamBuilds>
+      <whiteListTargetBranches>
+        <org.jenkinsci.plugins.ghprb.GhprbBranch>
+          <branch>alpha</branch>
+        </org.jenkinsci.plugins.ghprb.GhprbBranch>
+        <org.jenkinsci.plugins.ghprb.GhprbBranch>
+          <branch>stable</branch>
+        </org.jenkinsci.plugins.ghprb.GhprbBranch>
+      </whiteListTargetBranches>
+      <gitHubAuthId>5557154e-5545-4496-bad7-c69c7b057bd8</gitHubAuthId>
+      <triggerPhrase></triggerPhrase>
+      <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+      <extensions>
+        <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildStatus>
+          <messages>
+            <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
+              <message></message>
+              <result>SUCCESS</result>
+            </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
+            <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
+              <message></message>
+              <result>FAILURE</result>
+            </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
+            <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
+              <message></message>
+              <result>ERROR</result>
+            </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
+          </messages>
+        </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildStatus>
+        <org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+          <commitStatusContext></commitStatusContext>
+          <triggeredStatus></triggeredStatus>
+          <startedStatus></startedStatus>
+          <statusUrl></statusUrl>
+          <addTestResults>true</addTestResults>
+        </org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+        <org.jenkinsci.plugins.ghprb.extensions.build.GhprbCancelBuildsOnUpdate>
+          <overrideGlobal>false</overrideGlobal>
+        </org.jenkinsci.plugins.ghprb.extensions.build.GhprbCancelBuildsOnUpdate>
+      </extensions>
+    </org.jenkinsci.plugins.ghprb.GhprbTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>git clean -x -d -f
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,undefined,thread --test_format=log,tap --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
+      <command>${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,undefined,thread --valgrind=skip --test_format=log,tap --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.30">
       <configs>
@@ -74,48 +125,6 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
 
 
 </properties>
-            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-          </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu12,ubuntu14,windows</projects>
-          <condition>ALWAYS</condition>
-          <triggerWithNoParameters>false</triggerWithNoParameters>
-          <block>
-            <buildStepFailureThreshold>
-              <name>FAILURE</name>
-              <ordinal>2</ordinal>
-              <color>RED</color>
-              <completeBuild>true</completeBuild>
-            </buildStepFailureThreshold>
-            <unstableThreshold>
-              <name>UNSTABLE</name>
-              <ordinal>1</ordinal>
-              <color>YELLOW</color>
-              <completeBuild>true</completeBuild>
-            </unstableThreshold>
-            <failureThreshold>
-              <name>FAILURE</name>
-              <ordinal>2</ordinal>
-              <color>RED</color>
-              <completeBuild>true</completeBuild>
-            </failureThreshold>
-          </block>
-          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
-        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-      </configs>
-    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --tag_release --pypi --keys=/mdsplus/certs/jenkins</command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --publish --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins
-</command>
-    </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.30">
-      <configs>
-        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-              <properties>SRCDIR=${WORKSPACE}</properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
           <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu12,ubuntu14,windows</projects>
@@ -161,13 +170,6 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
         <jenkins.plugins.hipchat.model.NotificationConfig>
           <notifyEnabled>true</notifyEnabled>
           <textFormat>false</textFormat>
-          <notificationType>SUCCESS</notificationType>
-          <color>GREEN</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
           <notificationType>FAILURE</notificationType>
           <color>RED</color>
           <messageTemplate></messageTemplate>
@@ -175,14 +177,20 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
         <jenkins.plugins.hipchat.model.NotificationConfig>
           <notifyEnabled>true</notifyEnabled>
           <textFormat>false</textFormat>
-          <notificationType>ABORTED</notificationType>
-          <color>YELLOW</color>
+          <notificationType>SUCCESS</notificationType>
+          <color>GREEN</color>
           <messageTemplate></messageTemplate>
         </jenkins.plugins.hipchat.model.NotificationConfig>
       </notifications>
       <startJobMessage></startJobMessage>
       <completeJobMessage></completeJobMessage>
     </jenkins.plugins.hipchat.HipChatNotifier>
+    <com.cloudbees.jenkins.GitHubCommitNotifier plugin="github@1.19.1">
+      <statusMessage>
+        <content></content>
+      </statusMessage>
+      <resultOnFailure>FAILURE</resultOnFailure>
+    </com.cloudbees.jenkins.GitHubCommitNotifier>
   </publishers>
   <buildWrappers>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.2">

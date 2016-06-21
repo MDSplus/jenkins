@@ -31,7 +31,7 @@
     </EnvInjectJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>macosx</assignedNode>
+  <assignedNode>osx-mnt-lion</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -43,9 +43,14 @@
       <command>sleep 30 # Wait for nfs mount of trigger workspace to update
 if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
 then 
-  SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
+  SRCDIR=/var/lib/jenkins/workspace/${TRIGGER_JOB_NAME}
 fi
+set +e
 sudo ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$(($(stat -f %i .) % 256 + 4000))
+status=$?
+sudo chown -Rf twf:staff ${WORKSPACE}
+exit $status
+
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -63,28 +68,23 @@ sudo ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$(($(stat -f %i .) % 2
       <planRequired>false</planRequired>
       <verbose>true</verbose>
     </org.tap4j.plugin.TapPublisher>
-    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.26-SNAPSHOT">
-      <valgrindPublisherConfig>
-        <pattern>*/test*/*.xml,*/*/test*/*.xml,*/*/*/test*/*.xml,*/*/*/*/test*/*.xml,*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*/*test*/*.xml</pattern>
-        <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>
-        <failThresholdDefinitelyLost></failThresholdDefinitelyLost>
-        <failThresholdTotal></failThresholdTotal>
-        <unstableThresholdInvalidReadWrite></unstableThresholdInvalidReadWrite>
-        <unstableThresholdDefinitelyLost></unstableThresholdDefinitelyLost>
-        <unstableThresholdTotal></unstableThresholdTotal>
-        <publishResultsForAbortedBuilds>false</publishResultsForAbortedBuilds>
-        <publishResultsForFailedBuilds>true</publishResultsForFailedBuilds>
-        <failBuildOnMissingReports>false</failBuildOnMissingReports>
-        <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
-      </valgrindPublisherConfig>
-    </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@1.0.0">
+      <token></token>
+      <room>2361558</room>
+      <notifications>
+        <jenkins.plugins.hipchat.model.NotificationConfig>
+          <notifyEnabled>true</notifyEnabled>
+          <textFormat>false</textFormat>
+          <notificationType>FAILURE</notificationType>
+          <color>RED</color>
+          <messageTemplate></messageTemplate>
+        </jenkins.plugins.hipchat.model.NotificationConfig>
+      </notifications>
+      <startJobMessage></startJobMessage>
+      <completeJobMessage></completeJobMessage>
+    </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.29">
-      <deleteDirs>false</deleteDirs>
-      <cleanupParameter></cleanupParameter>
-      <externalDelete></externalDelete>
-    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
