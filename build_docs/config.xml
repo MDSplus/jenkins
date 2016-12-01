@@ -4,9 +4,24 @@
   <description>Build doxygen documentation for MDSplus</description>
   <keepDependencies>false</keepDependencies>
   <properties/>
-  <scm class="hudson.scm.NullSCM"/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.5.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/MDSplus/mdsplus</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/alpha</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -18,7 +33,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>docker pull mdsplus/docker:build_docs
-docker run --rm -v /mdsplus/docs:/buildroot mdsplus/docker:build_docs build feature-doxygen-docs</command>
+docker run --rm  -v ${WORKSPACE}:/source -v /mdsplus/docs:/buildroot mdsplus/docker:build_docs build</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

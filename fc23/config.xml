@@ -44,6 +44,11 @@
 then 
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
 fi
+if [ ! -r ${SRCDIR}/deploy/os/${JOB_NAME}.opts ]
+then
+  echo &quot;Branch does not support fc23. Skipping&quot;
+  exit 0
+fi
 if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
 then
   dorelease=&quot;--release&quot;

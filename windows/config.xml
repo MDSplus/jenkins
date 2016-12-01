@@ -13,7 +13,7 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>TRIGGER_JOB_NAME</name>
+          <name>SRCDIR</name>
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
@@ -44,12 +44,14 @@
 then 
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
 fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$(($(stat -c %i .) % 256 + 4000))
+${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) \
+--winhost=mdsplus-win7-hudson --winbld=/mdsplus-win7 --winrembld=/mdsplus-windows
+
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <org.tap4j.plugin.TapPublisher plugin="tap@1.24">
+    <org.tap4j.plugin.TapPublisher plugin="tap@1.25">
       <testResults>test-suite.tap,*/test-suite.tap,*/*/test-suite.tap,*/*/test-suite.tap,*/*/*/test-suite.tap,*/*/*/*/test-suite.tap,*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/*/*/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
@@ -61,6 +63,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$(($(stat -c %i .) % 256 + 
       <validateNumberOfTests>false</validateNumberOfTests>
       <planRequired>false</planRequired>
       <verbose>true</verbose>
+      <showOnlyFailures>false</showOnlyFailures>
     </org.tap4j.plugin.TapPublisher>
     <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@1.0.0">
       <token></token>
@@ -79,7 +82,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$(($(stat -c %i .) % 256 + 
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.29">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.30">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>

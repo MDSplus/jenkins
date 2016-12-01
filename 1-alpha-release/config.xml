@@ -3,19 +3,19 @@
   <actions/>
   <description></description>
   <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>1</daysToKeep>
-    <numToKeep>1</numToKeep>
+    <daysToKeep>7</daysToKeep>
+    <numToKeep>7</numToKeep>
     <artifactDaysToKeep>-1</artifactDaysToKeep>
     <artifactNumToKeep>-1</artifactNumToKeep>
   </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.19.1">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.20.0">
       <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.4">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.5.3">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -33,10 +33,11 @@
     <submoduleCfg class="list"/>
     <extensions>
       <hudson.plugins.git.extensions.impl.CloneOption>
-        <shallow>true</shallow>
+        <shallow>false</shallow>
         <noTags>false</noTags>
         <reference></reference>
         <depth>0</depth>
+        <honorRefspec>false</honorRefspec>
       </hudson.plugins.git.extensions.impl.CloneOption>
       <hudson.plugins.git.extensions.impl.SubmoduleOption>
         <disableSubmodules>false</disableSubmodules>
@@ -56,16 +57,16 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>H 18 * * *</spec>
+      <spec>H(1-15) 18 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
       <command>git clean -x -d -f
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,undefined,thread --test_format=log,tap --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
+${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,undefined,thread --test_format=log --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.30">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -76,7 +77,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
 </properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu12,ubuntu14,windows</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
@@ -110,7 +111,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
       <command>${WORKSPACE}/deploy/trigger.sh --publish --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins
 </command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.30">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -118,7 +119,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
               <properties>SRCDIR=${WORKSPACE}</properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu12,ubuntu14,windows</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
@@ -147,6 +148,11 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.17">
+      <recipients>mdsplus_git@psfc.mit.edu</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
     <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@1.0.0">
       <token>GotG4z2bNkyPVwnn9cdYxClaIdKnatNUudiN87M0</token>
       <room>2361558</room>
