@@ -2,14 +2,16 @@
 <project>
   <actions/>
   <description></description>
-  <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>5</daysToKeep>
-    <numToKeep>10</numToKeep>
-    <artifactDaysToKeep>-1</artifactDaysToKeep>
-    <artifactNumToKeep>-1</artifactNumToKeep>
-  </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>5</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
@@ -19,7 +21,7 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <EnvInjectJobProperty plugin="envinject@1.92.1">
+    <EnvInjectJobProperty plugin="envinject@1.93.1">
       <info>
         <loadFilesFromMaster>false</loadFilesFromMaster>
       </info>
@@ -27,7 +29,6 @@
       <keepJenkinsSystemVariables>true</keepJenkinsSystemVariables>
       <keepBuildVariables>true</keepBuildVariables>
       <overrideBuildParameters>true</overrideBuildParameters>
-      <contributors/>
     </EnvInjectJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
@@ -40,23 +41,25 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>dscacheutil -flushcache
-if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
+      <command>if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
 then 
-  SRCDIR=/var/lib/jenkins/workspace/${TRIGGER_JOB_NAME}
+  SRCDIR=/var/lib/jenkins/jobs/${TRIGGER_JOB_NAME}/workspace
 fi
 set +e
+sudo dscacheutil -flushcache
+sleep 10
+sudo find ${SRCDIR} -ls &gt; /dev/null # refresh cache if necessary
+sudo rm -Rf ${WORKSPACE}/build
 sudo ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4200+$EXECUTOR_NUMBER))
 status=$?
 sudo chown -Rf twf:staff ${WORKSPACE}
-sudo umount /var/lib/jenkins/workspace
 exit $status
 
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <org.tap4j.plugin.TapPublisher plugin="tap@1.25">
+    <org.tap4j.plugin.TapPublisher plugin="tap@2.0.1">
       <testResults>test-suite.tap,*/test-suite.tap,*/*/test-suite.tap,*/*/test-suite.tap,*/*/*/test-suite.tap,*/*/*/*/test-suite.tap,*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/*/*/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
@@ -69,9 +72,12 @@ exit $status
       <planRequired>false</planRequired>
       <verbose>true</verbose>
       <showOnlyFailures>false</showOnlyFailures>
+      <stripSingleParents>false</stripSingleParents>
+      <flattenTapResult>false</flattenTapResult>
+      <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@1.0.0">
-      <token></token>
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.0.0">
+      <credentialId></credentialId>
       <room>2361558</room>
       <notifications>
         <jenkins.plugins.hipchat.model.NotificationConfig>
@@ -87,7 +93,7 @@ exit $status
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.2">
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>
