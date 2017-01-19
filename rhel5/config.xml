@@ -68,7 +68,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.26-SNAPSHOT">
+    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.27">
       <valgrindPublisherConfig>
         <pattern>*/test*/*.xml,*/*/test*/*.xml,*/*/*/test*/*.xml,*/*/*/*/test*/*.xml,*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*/*test*/*.xml</pattern>
         <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>

@@ -54,7 +54,7 @@ if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
 then
   dorelease=&quot;--release&quot;
 fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) $dorelease
+${SRCDIR}/deploy/build.sh --os=$JOB_NAME --valgrind=memcheck,helgrind --sanitize=address,undefined,thread --eventport=$((4100+$EXECUTOR_NUMBER)) $dorelease
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -76,7 +76,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) 
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.26-SNAPSHOT">
+    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.27">
       <valgrindPublisherConfig>
         <pattern>*/test*/*.xml,*/*/test*/*.xml,*/*/*/test*/*.xml,*/*/*/*/test*/*.xml,*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*/*test*/*.xml</pattern>
         <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>
@@ -108,6 +108,11 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) 
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>

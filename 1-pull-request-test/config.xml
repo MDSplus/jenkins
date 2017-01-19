@@ -122,7 +122,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,undefined,thread --valgrind=skip --test_format=log,tap --keys=/mdsplus/certs/jenkins</command>
+      <command>${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log,tap --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
@@ -136,7 +136,7 @@ CHECKPKG=yes
 </properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
