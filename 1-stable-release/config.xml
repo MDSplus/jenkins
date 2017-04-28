@@ -12,12 +12,12 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.25.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.26.0">
       <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.1">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.5">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -53,7 +53,7 @@
       </hudson.plugins.git.extensions.impl.LocalBranch>
     </extensions>
   </scm>
-  <assignedNode>docker</assignedNode>
+  <assignedNode>master</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -67,7 +67,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>git clean -x -d -f
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,undefined,thread --test_format=log,tap --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
+${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
@@ -151,12 +151,12 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --sanitize=address,un
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.18">
+    <hudson.tasks.Mailer plugin="mailer@1.19">
       <recipients>mdsplus_git@psfc.mit.edu</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.0.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
       <credentialId>HipChat-API-Token</credentialId>
       <room>2361558</room>
       <notifications>

@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.25.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.26.0">
       <projectUrl>https://github.com/MDSplus/mdsplus/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -26,7 +26,7 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.1">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.5">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -52,13 +52,13 @@
       </hudson.plugins.git.extensions.impl.SubmoduleOption>
     </extensions>
   </scm>
-  <assignedNode>docker</assignedNode>
+  <assignedNode>master</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.33.4">
+    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.35.0">
       <spec>H/5 * * * *</spec>
       <latestVersion>3</latestVersion>
       <configVersion>3</configVersion>
@@ -89,6 +89,8 @@
       <gitHubAuthId>53b5bdb6-b0a2-42a1-ad07-e80fe89128bb</gitHubAuthId>
       <triggerPhrase></triggerPhrase>
       <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+      <blackListLabels></blackListLabels>
+      <whiteListLabels></whiteListLabels>
       <extensions>
         <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildStatus>
           <messages>
@@ -122,7 +124,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log,tap --keys=/mdsplus/certs/jenkins</command>
+      <command>${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test  --test_format=log,tap --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
@@ -136,7 +138,7 @@ CHECKPKG=yes
 </properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-x86,alpine3.3-x86_64,alpine3.3-armhf</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
@@ -196,12 +198,12 @@ CHECKPKG=yes
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.18">
+    <hudson.tasks.Mailer plugin="mailer@1.19">
       <recipients>mdsplus_git@psfc.mit.edu</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.0.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
       <credentialId>HipChat-API-Token</credentialId>
       <room>2361558</room>
       <notifications>
@@ -230,7 +232,7 @@ CHECKPKG=yes
       <startJobMessage></startJobMessage>
       <completeJobMessage></completeJobMessage>
     </jenkins.plugins.hipchat.HipChatNotifier>
-    <com.cloudbees.jenkins.GitHubCommitNotifier plugin="github@1.25.0">
+    <com.cloudbees.jenkins.GitHubCommitNotifier plugin="github@1.26.0">
       <statusMessage>
         <content></content>
       </statusMessage>
@@ -238,6 +240,11 @@ CHECKPKG=yes
     </com.cloudbees.jenkins.GitHubCommitNotifier>
   </publishers>
   <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>

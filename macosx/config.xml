@@ -76,7 +76,7 @@ exit $status
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.0.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
       <credentialId></credentialId>
       <room>2361558</room>
       <notifications>

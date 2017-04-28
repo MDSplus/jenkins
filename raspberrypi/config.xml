@@ -19,6 +19,11 @@
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CHECKPKG</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <EnvInjectJobProperty plugin="envinject@1.93.1">
@@ -46,10 +51,9 @@ then
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
 fi
 if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
-then
-  dorelease=&quot;--release&quot;
+then dorelease=&quot;--release&quot;
 fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME $dorelease
+${SRCDIR}/deploy/build.sh $dorelease --os=$JOB_NAME $dorelease
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -86,7 +90,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME $dorelease
         <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
       </valgrindPublisherConfig>
     </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.0.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
       <credentialId></credentialId>
       <room>2361558</room>
       <notifications>

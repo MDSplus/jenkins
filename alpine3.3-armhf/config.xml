@@ -8,8 +8,8 @@
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>5</daysToKeep>
         <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
+        <artifactDaysToKeep>1</artifactDaysToKeep>
+        <artifactNumToKeep>5</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -32,7 +32,7 @@
     </EnvInjectJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>docker</assignedNode>
+  <assignedNode>rpi</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -45,11 +45,7 @@
 then 
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
 fi
-if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
-then
-  dorelease=&quot;--release&quot;
-fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) $dorelease
+${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -108,6 +104,14 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) 
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.18">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>45</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>

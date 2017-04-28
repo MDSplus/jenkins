@@ -83,7 +83,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$ep
         <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
       </valgrindPublisherConfig>
     </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.0.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
       <room>2361558</room>
       <notifications>
         <jenkins.plugins.hipchat.model.NotificationConfig>

@@ -8,8 +8,8 @@
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>5</daysToKeep>
         <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
+        <artifactDaysToKeep>1</artifactDaysToKeep>
+        <artifactNumToKeep>5</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -44,6 +44,11 @@
       <command>if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
 then 
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
+fi
+if [ ! -r ${SRCDIR}/deploy/os/${JOB_NAME}.opts ]
+then
+  echo &quot;Branch does not support fc23. Skipping&quot;
+  exit 0
 fi
 if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
 then

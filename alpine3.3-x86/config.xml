@@ -8,8 +8,8 @@
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>5</daysToKeep>
         <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
+        <artifactDaysToKeep>1</artifactDaysToKeep>
+        <artifactNumToKeep>5</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -45,11 +45,7 @@
 then 
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
 fi
-if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
-then
-  dorelease=&quot;--release&quot;
-fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) $dorelease
+${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
 </command>
     </hudson.tasks.Shell>
   </builders>
