@@ -124,7 +124,8 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test  --test_format=log,tap --keys=/mdsplus/certs/jenkins</command>
+      <command>if ( ${WORKSPACE}/deploy/trigger.sh --help | grep make_jars &gt; /dev/null ) ; then MAKE_JARS=&quot;--make_jars=fc25&quot;; fi
+${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test  --test_format=log,tap --keys=/mdsplus/certs/jenkins ${MAKE_JARS}</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
@@ -225,6 +226,13 @@ CHECKPKG=yes
           <notifyEnabled>true</notifyEnabled>
           <textFormat>false</textFormat>
           <notificationType>SUCCESS</notificationType>
+          <color>GREEN</color>
+          <messageTemplate></messageTemplate>
+        </jenkins.plugins.hipchat.model.NotificationConfig>
+        <jenkins.plugins.hipchat.model.NotificationConfig>
+          <notifyEnabled>true</notifyEnabled>
+          <textFormat>false</textFormat>
+          <notificationType>BACK_TO_NORMAL</notificationType>
           <color>GREEN</color>
           <messageTemplate></messageTemplate>
         </jenkins.plugins.hipchat.model.NotificationConfig>

@@ -8,7 +8,7 @@
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>5</daysToKeep>
         <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>1</artifactDaysToKeep>
+        <artifactDaysToKeep>5</artifactDaysToKeep>
         <artifactNumToKeep>5</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
@@ -50,8 +50,16 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>**/test*/*.xml,**/test-suite.tap,**/test*/*.log</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
     <org.tap4j.plugin.TapPublisher plugin="tap@2.0.1">
-      <testResults>test-suite.tap,*/test-suite.tap,*/*/test-suite.tap,*/*/test-suite.tap,*/*/*/test-suite.tap,*/*/*/*/test-suite.tap,*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/*/test-suite.tap,*/*/*/*/*/*/*/*/test-suite.tap</testResults>
+      <testResults>**/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
       <outputTapToConsole>true</outputTapToConsole>
@@ -69,7 +77,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
     </org.tap4j.plugin.TapPublisher>
     <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.27">
       <valgrindPublisherConfig>
-        <pattern>*/test*/*.xml,*/*/test*/*.xml,*/*/*/test*/*.xml,*/*/*/*/test*/*.xml,*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/test*/*.xml,*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*test*/*.xml,*/*/*/*/*/*/*/*/*/*/*test*/*.xml</pattern>
+        <pattern>**/test*/*.xml</pattern>
         <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>
         <failThresholdDefinitelyLost></failThresholdDefinitelyLost>
         <failThresholdTotal></failThresholdTotal>

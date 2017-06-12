@@ -16,6 +16,15 @@
       <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>promote</name>
+          <description>Enable this option if you want to promote the stable release to the head of the current alpha branch. This should only be done it the alpha releases have been thoroughly tested in real use to ensure the alpha branch qualifies to become the new stable release.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
   </properties>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.5">
     <configVersion>2</configVersion>
@@ -67,7 +76,11 @@
   <builders>
     <hudson.tasks.Shell>
       <command>git clean -x -d -f
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
+if [ &quot;$promote&quot; == &quot;True&quot; ]
+then
+  promote_to=&quot;promote_to=alpha&quot;
+fi
+${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
       <configs>
@@ -80,7 +93,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release --releasedir=/mdsp
 </properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows,macosx</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,macosx</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
@@ -186,6 +199,13 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release --releasedir=/mdsp
           <textFormat>false</textFormat>
           <notificationType>ABORTED</notificationType>
           <color>YELLOW</color>
+          <messageTemplate></messageTemplate>
+        </jenkins.plugins.hipchat.model.NotificationConfig>
+        <jenkins.plugins.hipchat.model.NotificationConfig>
+          <notifyEnabled>true</notifyEnabled>
+          <textFormat>false</textFormat>
+          <notificationType>BACK_TO_NORMAL</notificationType>
+          <color>GREEN</color>
           <messageTemplate></messageTemplate>
         </jenkins.plugins.hipchat.model.NotificationConfig>
       </notifications>
