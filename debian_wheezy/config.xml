@@ -52,7 +52,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>**/test*/*.xml,**/test-suite.tap</artifacts>
+      <artifacts>**/test*/*.xml,**/test-suite.tap,**/test*/*.log</artifacts>
       <allowEmptyArchive>true</allowEmptyArchive>
       <onlyIfSuccessful>false</onlyIfSuccessful>
       <fingerprint>false</fingerprint>

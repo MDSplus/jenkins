@@ -41,7 +41,9 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
+      <command>export PATH=${PATH}:/usr/local/bin
+export OPENMOTIF=/usr/local/OpenMotif21
+if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
 then 
   SRCDIR=/var/lib/jenkins/jobs/${TRIGGER_JOB_NAME}/workspace
 fi

@@ -139,7 +139,7 @@ CHECKPKG=yes
 </properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-x86,alpine3.3-x86_64,alpine3.3-armhf</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-x86,alpine3.3-x86_64,alpine3.3-armhf</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>

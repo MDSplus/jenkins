@@ -93,7 +93,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
 </properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,macosx</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
@@ -135,7 +135,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
               <properties>SRCDIR=${WORKSPACE}</properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows,macosx</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <block>
