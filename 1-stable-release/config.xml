@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.26.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.28.1">
       <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -26,7 +26,7 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.5">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.6.4">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -62,7 +62,7 @@
       </hudson.plugins.git.extensions.impl.LocalBranch>
     </extensions>
   </scm>
-  <assignedNode>master</assignedNode>
+  <assignedNode>trigger</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -73,6 +73,7 @@
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>/mdsplus/jenkins/workspace/1-stable-release</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
       <command>git clean -x -d -f
@@ -82,7 +83,7 @@ then
 fi
 ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -91,11 +92,13 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
 
 
 </properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <block>
             <buildStepFailureThreshold>
               <name>FAILURE</name>
@@ -127,17 +130,19 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
       <command>${WORKSPACE}/deploy/trigger.sh --publish --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins
 </command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>SRCDIR=${WORKSPACE}</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,windows</projects>
+          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <block>
             <buildStepFailureThreshold>
               <name>FAILURE</name>
@@ -164,12 +169,12 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.19">
+    <hudson.tasks.Mailer plugin="mailer@1.20">
       <recipients>mdsplus_git@psfc.mit.edu</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
       <credentialId>HipChat-API-Token</credentialId>
       <room>2361558</room>
       <notifications>
@@ -214,7 +219,13 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>90</timeoutMinutes>
+      </strategy>
+      <operationList/>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>

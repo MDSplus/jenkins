@@ -21,8 +21,12 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <EnvInjectJobProperty plugin="envinject@1.93.1">
+    <EnvInjectJobProperty plugin="envinject@2.1.3">
       <info>
+        <secureGroovyScript plugin="script-security@1.29.1">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
         <loadFilesFromMaster>false</loadFilesFromMaster>
       </info>
       <on>true</on>
@@ -41,8 +45,9 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>export PATH=${PATH}:/usr/local/bin
-export OPENMOTIF=/usr/local/OpenMotif21
+      <command>#export PATH=${PATH}:/usr/local/bin
+#export OPENMOTIF=/Applications/OpenMotif21
+#export SYBASE=/usr/local/Cellar/freetds/1.00.48
 if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
 then 
   SRCDIR=/var/lib/jenkins/jobs/${TRIGGER_JOB_NAME}/workspace
@@ -52,11 +57,19 @@ sudo dscacheutil -flushcache
 sleep 10
 sudo find ${SRCDIR} -ls &gt; /dev/null # refresh cache if necessary
 sudo rm -Rf ${WORKSPACE}/build
-sudo ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4200+$EXECUTOR_NUMBER))
-status=$?
-sudo chown -Rf twf:staff ${WORKSPACE}
-exit $status
-
+if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
+then
+  dorelease=&quot;--release&quot;
+fi
+if [ -r ${SRCDIR}/deploy/platform/macosx/MDSplus.pkgproj ] # if the source has the newer packaging build it
+then
+  sudo DEVELOPER_DIR=/ OPENMOTIF=/usr ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4200+$EXECUTOR_NUMBER)) ${dorelease}
+  status=$?
+  sudo chown -Rf twf:staff ${WORKSPACE}
+  exit $status
+else
+  echo &quot;${SRCDIR}/deploy/platform/macosx/MDSplus.pkgproj not found. Skipping.&quot;
+fi
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -69,7 +82,7 @@ exit $status
       <defaultExcludes>true</defaultExcludes>
       <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
-    <org.tap4j.plugin.TapPublisher plugin="tap@2.0.1">
+    <org.tap4j.plugin.TapPublisher plugin="tap@2.1">
       <testResults>**/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
@@ -86,7 +99,7 @@ exit $status
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
       <credentialId></credentialId>
       <room>2361558</room>
       <notifications>
@@ -103,12 +116,21 @@ exit $status
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>40</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>

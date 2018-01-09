@@ -19,10 +19,19 @@
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CHECKPKG</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <EnvInjectJobProperty plugin="envinject@1.93.1">
+    <EnvInjectJobProperty plugin="envinject@2.1.3">
       <info>
+        <secureGroovyScript plugin="script-security@1.29.1">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
         <loadFilesFromMaster>false</loadFilesFromMaster>
       </info>
       <on>true</on>
@@ -45,8 +54,18 @@
 then 
   SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
 fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) \
---winhost=mdsplus-win7-hudson --winbld=/mdsplus-win7 --winrembld=/mdsplus-windows
+stat=1
+if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
+then
+  dorelease=&quot;--release&quot;
+fi
+if ( ${SRCDIR}/deploy/build.sh --os=$JOB_NAME $dorelease --eventport=$((4100+$EXECUTOR_NUMBER)) \
+--winhost=mdsplus-win7-hudson --winbld=/mdsplus-win7 --winrembld=/mdsplus-windows )
+then
+  stat=0
+fi
+find ${WORKSPACE} -type d -name &apos;winebottle_mingw*&apos; -prune -exec rm -rf {} \;
+exit ${stat}
 
 </command>
     </hudson.tasks.Shell>
@@ -60,7 +79,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) 
       <defaultExcludes>true</defaultExcludes>
       <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
-    <org.tap4j.plugin.TapPublisher plugin="tap@2.0.1">
+    <org.tap4j.plugin.TapPublisher plugin="tap@2.1">
       <testResults>*/test-suite.tap,*/*/test-suite.tap,*/*/*/test-suite.tap,*/*/*/*/test-suite.tap,*/*/*/*/*/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
@@ -77,7 +96,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) 
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
       <credentialId></credentialId>
       <room>2361558</room>
       <notifications>
@@ -94,12 +113,21 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) 
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>60</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>

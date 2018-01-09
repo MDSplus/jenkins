@@ -12,12 +12,12 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.26.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.28.1">
       <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.5">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.6.4">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -53,7 +53,7 @@
       </hudson.plugins.git.extensions.impl.LocalBranch>
     </extensions>
   </scm>
-  <assignedNode>master</assignedNode>
+  <assignedNode>trigger</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -64,12 +64,15 @@
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>/mdsplus/jenkins/workspace/1-alpha-release</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
       <command>git clean -x -d -f
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log --release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins --make_jars=fc25</command>
+${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log \
+--release --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins --make_jars=fc25
+</command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -78,11 +81,13 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log --r
 
 
 </properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-armhf,alpine3.3-x86,alpine3.3-x86_64</projects>
+          <projects>macosx,debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,fc26,fc27,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-x86,alpine3.3-x86_64</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <block>
             <buildStepFailureThreshold>
               <name>FAILURE</name>
@@ -108,23 +113,25 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log --r
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
     <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --tag_release --pypi --keys=/mdsplus/certs/jenkins</command>
+      <command>${WORKSPACE}/deploy/trigger.sh --tag_release --keys=/mdsplus/certs/jenkins</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>${WORKSPACE}/deploy/trigger.sh --publish --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins
 </command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>SRCDIR=${WORKSPACE}</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-armhf,alpine3.3-x86,alpine3.3-x86_64</projects>
+          <projects>macosx,debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,fc26,fc27,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-x86,alpine3.3-x86_64</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <block>
             <buildStepFailureThreshold>
               <name>FAILURE</name>
@@ -149,14 +156,32 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log --r
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.tasks.Shell>
+      <command>if [ -r /mdsplus/jenkins/findWarnings.sh ]
+then
+  if ( ! /mdsplus/jenkins/findWarnings.sh )
+  then
+    echo &quot;Problem finding warnings&quot;
+  fi
+fi
+</command>
+    </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.19">
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>make_jars.log</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.Mailer plugin="mailer@1.20">
       <recipients>mdsplus_git@psfc.mit.edu</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
       <credentialId>HipChat-API-Token</credentialId>
       <room>2361558</room>
       <notifications>
@@ -201,7 +226,7 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log --r
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.18">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
         <timeoutMinutes>90</timeoutMinutes>
       </strategy>
@@ -209,7 +234,8 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log --r
         <hudson.plugins.build__timeout.operations.FailOperation/>
       </operationList>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>

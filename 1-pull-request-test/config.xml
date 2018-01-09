@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.26.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.28.1">
       <projectUrl>https://github.com/MDSplus/mdsplus/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -26,13 +26,13 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.0.5">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.6.4">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
         <refspec>+refs/pull/*:refs/remotes/origin/pr/*</refspec>
         <url>git@github.com:/MDSplus/mdsplus.git</url>
-        <credentialsId>35126f42-ed07-43bc-8659-ba2b1484f602</credentialsId>
+        <credentialsId>59bc852d-ca93-4dc3-9c41-faa0416e3a70</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -52,33 +52,34 @@
       </hudson.plugins.git.extensions.impl.SubmoduleOption>
     </extensions>
   </scm>
-  <assignedNode>master</assignedNode>
+  <assignedNode>trigger</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.35.0">
+    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.39.0">
       <spec>H/5 * * * *</spec>
-      <latestVersion>3</latestVersion>
       <configVersion>3</configVersion>
-      <adminlist>tfredian</adminlist>
-      <allowMembersOfWhitelistedOrgsAsAdmin>true</allowMembersOfWhitelistedOrgsAsAdmin>
-      <orgslist>MDSplus</orgslist>
+      <adminlist>AndreaRigoni
+zack-vii
+tfredian
+joshStillerman
+GabrieleManduchi
+kgerickson</adminlist>
+      <allowMembersOfWhitelistedOrgsAsAdmin>false</allowMembersOfWhitelistedOrgsAsAdmin>
+      <orgslist></orgslist>
       <cron>H/5 * * * *</cron>
       <buildDescTemplate></buildDescTemplate>
       <onlyTriggerPhrase>false</onlyTriggerPhrase>
       <useGitHubHooks>true</useGitHubHooks>
       <permitAll>false</permitAll>
-      <whitelist>zack-vii</whitelist>
+      <whitelist></whitelist>
       <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
       <displayBuildErrorsOnDownstreamBuilds>false</displayBuildErrorsOnDownstreamBuilds>
       <whiteListTargetBranches>
         <org.jenkinsci.plugins.ghprb.GhprbBranch>
-          <branch>alpha</branch>
-        </org.jenkinsci.plugins.ghprb.GhprbBranch>
-        <org.jenkinsci.plugins.ghprb.GhprbBranch>
-          <branch>stable</branch>
+          <branch></branch>
         </org.jenkinsci.plugins.ghprb.GhprbBranch>
       </whiteListTargetBranches>
       <blackListTargetBranches>
@@ -86,28 +87,18 @@
           <branch></branch>
         </org.jenkinsci.plugins.ghprb.GhprbBranch>
       </blackListTargetBranches>
-      <gitHubAuthId>53b5bdb6-b0a2-42a1-ad07-e80fe89128bb</gitHubAuthId>
+      <gitHubAuthId>ff5e3799-21be-472f-bf6f-c42bf093a427</gitHubAuthId>
       <triggerPhrase></triggerPhrase>
       <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+      <blackListCommitAuthor></blackListCommitAuthor>
       <blackListLabels></blackListLabels>
       <whiteListLabels></whiteListLabels>
+      <includedRegions></includedRegions>
+      <excludedRegions></excludedRegions>
       <extensions>
-        <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildStatus>
-          <messages>
-            <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
-              <message></message>
-              <result>SUCCESS</result>
-            </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
-            <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
-              <message></message>
-              <result>FAILURE</result>
-            </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
-            <org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
-              <message></message>
-              <result>ERROR</result>
-            </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildResultMessage>
-          </messages>
-        </org.jenkinsci.plugins.ghprb.extensions.comments.GhprbBuildStatus>
+        <org.jenkinsci.plugins.ghprb.extensions.build.GhprbCancelBuildsOnUpdate>
+          <overrideGlobal>false</overrideGlobal>
+        </org.jenkinsci.plugins.ghprb.extensions.build.GhprbCancelBuildsOnUpdate>
         <org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
           <commitStatusContext></commitStatusContext>
           <triggeredStatus></triggeredStatus>
@@ -115,33 +106,34 @@
           <statusUrl></statusUrl>
           <addTestResults>true</addTestResults>
         </org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
-        <org.jenkinsci.plugins.ghprb.extensions.build.GhprbCancelBuildsOnUpdate>
-          <overrideGlobal>false</overrideGlobal>
-        </org.jenkinsci.plugins.ghprb.extensions.build.GhprbCancelBuildsOnUpdate>
       </extensions>
     </org.jenkinsci.plugins.ghprb.GhprbTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>/mdsplus/jenkins/workspace/1-pull-request-test</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
       <command>if ( ${WORKSPACE}/deploy/trigger.sh --help | grep make_jars &gt; /dev/null ) ; then MAKE_JARS=&quot;--make_jars=fc25&quot;; fi
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test  --test_format=log,tap --keys=/mdsplus/certs/jenkins ${MAKE_JARS}</command>
+${WORKSPACE}/deploy/trigger.sh --color --dockerpull --test --test_format=log,tap --keys=/mdsplus/certs/jenkins ${MAKE_JARS}
+</command>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>SRCDIR=$WORKSPACE
 CHECKPKG=yes
-
+ghprbTargetBranch=$ghprbTargetBranch
 
 </properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-x86,alpine3.3-x86_64,alpine3.3-armhf</projects>
+          <projects>macosx,debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,fc26,fc27,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows,alpine3.3-armhf,alpine3.3-x86,alpine3.3-x86_64</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <block>
             <buildStepFailureThreshold>
               <name>FAILURE</name>
@@ -166,13 +158,14 @@ CHECKPKG=yes
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.32">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs class="empty-list"/>
           <projects>java-findbugs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <block>
             <buildStepFailureThreshold>
               <name>FAILURE</name>
@@ -199,12 +192,20 @@ CHECKPKG=yes
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.19">
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>make_jars.log</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.Mailer plugin="mailer@1.20">
       <recipients>mdsplus_git@psfc.mit.edu</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
       <credentialId>HipChat-API-Token</credentialId>
       <room>2361558</room>
       <notifications>
@@ -240,7 +241,7 @@ CHECKPKG=yes
       <startJobMessage></startJobMessage>
       <completeJobMessage></completeJobMessage>
     </jenkins.plugins.hipchat.HipChatNotifier>
-    <com.cloudbees.jenkins.GitHubCommitNotifier plugin="github@1.26.0">
+    <com.cloudbees.jenkins.GitHubCommitNotifier plugin="github@1.28.1">
       <statusMessage>
         <content></content>
       </statusMessage>
@@ -248,12 +249,13 @@ CHECKPKG=yes
     </com.cloudbees.jenkins.GitHubCommitNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>

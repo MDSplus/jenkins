@@ -24,10 +24,19 @@
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ghprbTargetBranch</name>
+          <description>Target branch for pull request</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <EnvInjectJobProperty plugin="envinject@1.93.1">
+    <EnvInjectJobProperty plugin="envinject@2.1.3">
       <info>
+        <secureGroovyScript plugin="script-security@1.29.1">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
         <loadFilesFromMaster>false</loadFilesFromMaster>
       </info>
       <on>true</on>
@@ -37,7 +46,7 @@
     </EnvInjectJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>docker</assignedNode>
+  <assignedNode>valgrind</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -59,7 +68,16 @@ if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
 then
   dorelease=&quot;--release&quot;
 fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --sanitize --eventport=$((4100+$EXECUTOR_NUMBER))
+if [ &quot;$ghprbTargetBranch&quot; == &quot;stable&quot; ]
+then
+  VG=&quot;&quot;
+elif ( grep &quot;\-\-branch=stable&quot; ${SRCDIR}/trigger.opts &gt; /dev/null )
+then
+  VG=&quot;&quot;
+else
+  VG=&quot;--valgrind&quot;
+fi
+${SRCDIR}/deploy/build.sh --os=$JOB_NAME $VG --eventport=$((4100+$EXECUTOR_NUMBER))
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -72,29 +90,29 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --sanitize --eventport=$((4100+$EXECUTO
       <defaultExcludes>true</defaultExcludes>
       <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
-    <org.tap4j.plugin.TapPublisher plugin="tap@2.0.1">
+    <org.tap4j.plugin.TapPublisher plugin="tap@2.1">
       <testResults>**/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
-      <outputTapToConsole>true</outputTapToConsole>
+      <outputTapToConsole>false</outputTapToConsole>
       <enableSubtests>true</enableSubtests>
       <discardOldReports>true</discardOldReports>
       <todoIsFailure>false</todoIsFailure>
       <includeCommentDiagnostics>true</includeCommentDiagnostics>
       <validateNumberOfTests>false</validateNumberOfTests>
       <planRequired>false</planRequired>
-      <verbose>true</verbose>
+      <verbose>false</verbose>
       <showOnlyFailures>false</showOnlyFailures>
       <stripSingleParents>false</stripSingleParents>
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.27">
+    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.28-SNAPSHOT">
       <valgrindPublisherConfig>
         <pattern>**/test*/*.xml</pattern>
         <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>
         <failThresholdDefinitelyLost></failThresholdDefinitelyLost>
-        <failThresholdTotal></failThresholdTotal>
+        <failThresholdTotal>0</failThresholdTotal>
         <unstableThresholdInvalidReadWrite></unstableThresholdInvalidReadWrite>
         <unstableThresholdDefinitelyLost></unstableThresholdDefinitelyLost>
         <unstableThresholdTotal></unstableThresholdTotal>
@@ -104,7 +122,7 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --sanitize --eventport=$((4100+$EXECUTO
         <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
       </valgrindPublisherConfig>
     </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.0">
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
       <credentialId></credentialId>
       <room>2361558</room>
       <notifications>
@@ -121,12 +139,21 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --sanitize --eventport=$((4100+$EXECUTO
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.3">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>90</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>
