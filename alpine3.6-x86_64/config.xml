@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Build and test for Ubuntu 14</description>
+  <description>Build and test for alpine &lt;=3.6 x86_64</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -17,6 +17,12 @@
         <hudson.model.StringParameterDefinition>
           <name>SRCDIR</name>
           <description>Workspace of Trigger Job</description>
+          <defaultValue>/home/jenkins/slave/workspace/1-pull-request-test</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CHECKPKG</name>
+          <description>build release as well if yes</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -33,8 +39,11 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>time -f &quot;%e&quot; rsync -a mdsplus-jenkins2:${SRCDIR}/ ${WORKSPACE}/src
-${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER))
+      <command>if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
+then dorelease=&quot;--release&quot;
+fi
+time -f &quot;%e&quot; rsync -a mdsplus-jenkins2:${SRCDIR}/ ${WORKSPACE}/src
+${WORKSPACE}/src/deploy/build.sh $dorelease --os=$JOB_NAME
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -83,9 +92,10 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
     <jenkins.plugins.slack.SlackNotifier plugin="slack@2.18">
       <baseUrl>https://mdsplus.slack.com/services/hooks/jenkins-ci/</baseUrl>
       <teamDomain></teamDomain>
+      <authToken></authToken>
       <tokenCredentialId>1f90e950-9b04-4b9e-9cd3-a921a61214bc</tokenCredentialId>
       <botUser>false</botUser>
-      <room>jenkins</room>
+      <room></room>
       <startNotification>false</startNotification>
       <notifySuccess>false</notifySuccess>
       <notifyAborted>false</notifyAborted>
@@ -98,8 +108,13 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
       <includeTestSummary>false</includeTestSummary>
       <includeFailedTests>false</includeFailedTests>
       <commitInfoChoice>NONE</commitInfoChoice>
-      <includeCustomMessage>true</includeCustomMessage>
+      <includeCustomMessage>false</includeCustomMessage>
       <customMessage></customMessage>
+      <customMessageSuccess></customMessageSuccess>
+      <customMessageAborted></customMessageAborted>
+      <customMessageNotBuilt></customMessageNotBuilt>
+      <customMessageUnstable></customMessageUnstable>
+      <customMessageFailure></customMessageFailure>
     </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers>

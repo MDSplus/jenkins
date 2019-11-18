@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Build and test for Ubuntu 14</description>
+  <description>Build and test for  Debian Wheezy 32bit</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -47,7 +47,7 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
       <defaultExcludes>true</defaultExcludes>
       <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
-    <org.tap4j.plugin.TapPublisher plugin="tap@2.2.2">
+    <org.tap4j.plugin.TapPublisher plugin="tap@2.3">
       <testResults>tests/**/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
@@ -62,6 +62,7 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
       <showOnlyFailures>false</showOnlyFailures>
       <stripSingleParents>false</stripSingleParents>
       <flattenTapResult>false</flattenTapResult>
+      <removeYamlIfCorrupted>false</removeYamlIfCorrupted>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
     <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.28">
@@ -80,12 +81,16 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
         <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
       </valgrindPublisherConfig>
     </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
-    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.18">
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.34">
       <baseUrl>https://mdsplus.slack.com/services/hooks/jenkins-ci/</baseUrl>
       <teamDomain></teamDomain>
+      <authToken></authToken>
       <tokenCredentialId>1f90e950-9b04-4b9e-9cd3-a921a61214bc</tokenCredentialId>
       <botUser>false</botUser>
       <room>jenkins</room>
+      <sendAsText>false</sendAsText>
+      <iconEmoji></iconEmoji>
+      <username></username>
       <startNotification>false</startNotification>
       <notifySuccess>false</notifySuccess>
       <notifyAborted>false</notifyAborted>
@@ -93,13 +98,19 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
       <notifyUnstable>false</notifyUnstable>
       <notifyRegression>false</notifyRegression>
       <notifyFailure>true</notifyFailure>
+      <notifyEveryFailure>false</notifyEveryFailure>
       <notifyBackToNormal>false</notifyBackToNormal>
       <notifyRepeatedFailure>false</notifyRepeatedFailure>
       <includeTestSummary>false</includeTestSummary>
       <includeFailedTests>false</includeFailedTests>
       <commitInfoChoice>NONE</commitInfoChoice>
-      <includeCustomMessage>true</includeCustomMessage>
+      <includeCustomMessage>false</includeCustomMessage>
       <customMessage></customMessage>
+      <customMessageSuccess></customMessageSuccess>
+      <customMessageAborted></customMessageAborted>
+      <customMessageNotBuilt></customMessageNotBuilt>
+      <customMessageUnstable></customMessageUnstable>
+      <customMessageFailure></customMessageFailure>
     </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers>
@@ -110,12 +121,12 @@ ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NU
       <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
-      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>40</timeoutMinutes>
+      <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
+        <timeoutSecondsString>600</timeoutSecondsString>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.6.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>

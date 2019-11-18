@@ -1,7 +1,9 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description></description>
+  <description>Build and test for Fedora Core 23&#xd;
+&#xd;
+sanitize address</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -16,27 +18,15 @@
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>SRCDIR</name>
-          <description></description>
-          <defaultValue></defaultValue>
+          <description>Workspace of Trigger Job</description>
+          <defaultValue>/home/jenkins/slave/workspace/1-pull-request-test</defaultValue>
+          <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <EnvInjectJobProperty plugin="envinject@2.1.3">
-      <info>
-        <secureGroovyScript plugin="script-security@1.29.1">
-          <script></script>
-          <sandbox>false</sandbox>
-        </secureGroovyScript>
-        <loadFilesFromMaster>false</loadFilesFromMaster>
-      </info>
-      <on>true</on>
-      <keepJenkinsSystemVariables>true</keepJenkinsSystemVariables>
-      <keepBuildVariables>true</keepBuildVariables>
-      <overrideBuildParameters>true</overrideBuildParameters>
-    </EnvInjectJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>docker</assignedNode>
+  <assignedNode>sanitize</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -45,39 +35,27 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
-then 
-  SRCDIR=${JENKINS_HOME}/workspace/${TRIGGER_JOB_NAME}
-fi
-if [ ! -r ${SRCDIR}/deploy/os/${JOB_NAME}.opts ]
-then
-  echo &quot;Branch does not support fc23. Skipping&quot;
-  exit 0
-fi
-if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
-then
-  dorelease=&quot;--release&quot;
-fi
-${SRCDIR}/deploy/build.sh --os=$JOB_NAME --sanitize=address,undefined --eventport=$((4100+$EXECUTOR_NUMBER)) $dorelease
+      <command>time -f &quot;%e&quot; rsync -a mdsplus-jenkins2:${SRCDIR}/ ${WORKSPACE}/src
+${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4100+$EXECUTOR_NUMBER)) --sanitize --sanitize=address
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>**/test*/*.xml,**/test-suite.tap,**/test*/*.log</artifacts>
+      <artifacts>tests/**/test*/*.xml,tests/**/test-suite.tap,tests/**/test*/*.log,tests/**/*.core.*</artifacts>
       <allowEmptyArchive>true</allowEmptyArchive>
       <onlyIfSuccessful>false</onlyIfSuccessful>
       <fingerprint>false</fingerprint>
       <defaultExcludes>true</defaultExcludes>
       <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
-    <org.tap4j.plugin.TapPublisher plugin="tap@2.1">
-      <testResults>**/test-suite.tap</testResults>
+    <org.tap4j.plugin.TapPublisher plugin="tap@2.2.2">
+      <testResults>tests/**/test-suite.tap</testResults>
       <failIfNoResults>false</failIfNoResults>
       <failedTestsMarkBuildAsFailure>true</failedTestsMarkBuildAsFailure>
       <outputTapToConsole>true</outputTapToConsole>
       <enableSubtests>true</enableSubtests>
-      <discardOldReports>false</discardOldReports>
+      <discardOldReports>true</discardOldReports>
       <todoIsFailure>false</todoIsFailure>
       <includeCommentDiagnostics>true</includeCommentDiagnostics>
       <validateNumberOfTests>false</validateNumberOfTests>
@@ -88,53 +66,67 @@ ${SRCDIR}/deploy/build.sh --os=$JOB_NAME --sanitize=address,undefined --eventpor
       <flattenTapResult>false</flattenTapResult>
       <skipIfBuildNotOk>false</skipIfBuildNotOk>
     </org.tap4j.plugin.TapPublisher>
-    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.28-SNAPSHOT">
+    <org.jenkinsci.plugins.valgrind.ValgrindPublisher plugin="valgrind@0.28">
       <valgrindPublisherConfig>
-        <pattern>**/test*/*.xml</pattern>
+        <pattern>tests/**/test*/*.xml</pattern>
         <failThresholdInvalidReadWrite></failThresholdInvalidReadWrite>
         <failThresholdDefinitelyLost></failThresholdDefinitelyLost>
         <failThresholdTotal></failThresholdTotal>
         <unstableThresholdInvalidReadWrite></unstableThresholdInvalidReadWrite>
         <unstableThresholdDefinitelyLost></unstableThresholdDefinitelyLost>
         <unstableThresholdTotal></unstableThresholdTotal>
+        <sourceSubstitutionPaths></sourceSubstitutionPaths>
         <publishResultsForAbortedBuilds>false</publishResultsForAbortedBuilds>
         <publishResultsForFailedBuilds>true</publishResultsForFailedBuilds>
         <failBuildOnMissingReports>false</failBuildOnMissingReports>
         <failBuildOnInvalidReports>false</failBuildOnInvalidReports>
       </valgrindPublisherConfig>
     </org.jenkinsci.plugins.valgrind.ValgrindPublisher>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
-      <credentialId></credentialId>
-      <room>2361558</room>
-      <notifications>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
-          <notificationType>FAILURE</notificationType>
-          <color>RED</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-      </notifications>
-      <startJobMessage></startJobMessage>
-      <completeJobMessage></completeJobMessage>
-    </jenkins.plugins.hipchat.HipChatNotifier>
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.18">
+      <baseUrl>https://mdsplus.slack.com/services/hooks/jenkins-ci/</baseUrl>
+      <teamDomain></teamDomain>
+      <authToken></authToken>
+      <tokenCredentialId>1f90e950-9b04-4b9e-9cd3-a921a61214bc</tokenCredentialId>
+      <botUser>false</botUser>
+      <room>jenkins</room>
+      <startNotification>false</startNotification>
+      <notifySuccess>false</notifySuccess>
+      <notifyAborted>false</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
+      <notifyRegression>false</notifyRegression>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <includeFailedTests>false</includeFailedTests>
+      <commitInfoChoice>NONE</commitInfoChoice>
+      <includeCustomMessage>false</includeCustomMessage>
+      <customMessage></customMessage>
+      <customMessageSuccess></customMessageSuccess>
+      <customMessageAborted></customMessageAborted>
+      <customMessageNotBuilt></customMessageNotBuilt>
+      <customMessageUnstable></customMessageUnstable>
+      <customMessageFailure></customMessageFailure>
+    </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
-      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>40</timeoutMinutes>
+      <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
+        <timeoutSecondsString>900</timeoutSecondsString>
       </strategy>
       <operationList>
         <hudson.plugins.build__timeout.operations.FailOperation/>
       </operationList>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.6.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>

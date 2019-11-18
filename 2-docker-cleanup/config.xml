@@ -1,63 +1,34 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description></description>
+  <description>This job triggere a docker cleanup on all workers</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
-        <daysToKeep>5</daysToKeep>
-        <numToKeep>10</numToKeep>
+        <daysToKeep>7</daysToKeep>
+        <numToKeep>7</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>SRCDIR</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>mac_mdsplus</assignedNode>
+  <assignedNode>trigger</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>H(23-24) 20 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>export PATH=&quot;${PATH}:/usr/local/bin&quot;
-if [ -z &quot;$SRCDIR&quot; -a ! -z &quot;$TRIGGER_JOB_NAME&quot; ]
-then 
-  SRCDIR=/var/lib/jenkins/jobs/${TRIGGER_JOB_NAME}/workspace
-fi
-rsync -a mdsplus-jenkins@mdsplus-jenkins2:${SRCDIR}/ ${WORKSPACE}/src
-set +e
-#sudo dscacheutil -flushcache
-#sleep 10
-#sudo find ${SRCDIR} -ls &gt; /dev/null # refresh cache if necessary
-#sudo rm -Rf ${WORKSPACE}/build
-if [ &quot;$CHECKPKG&quot; = &quot;yes&quot; ]
-then
-  dorelease=&quot;--release&quot;
-fi
-if [ -r ${WORKSPACE}/src/deploy/platform/macosx/MDSplus.pkgproj ] # if the source has the newer packaging build it
-then
-  sudo PATH=&quot;${PATH}&quot; DEVELOPER_DIR=/ OPENMOTIF=/usr ${WORKSPACE}/src/deploy/build.sh --os=$JOB_NAME --eventport=$((4200+$EXECUTOR_NUMBER)) ${dorelease}
-  status=$?
-  sudo chown -Rf twf:staff ${WORKSPACE}
-  sudo chown -Rf 987:981 /mdsplus/dist/macosx
-  exit $status
-else
-  echo &quot;${SRCDIR}/deploy/platform/macosx/MDSplus.pkgproj not found. Skipping.&quot;
-fi
+      <command>/mdsplus/jenkins/bin/clean_build_dockers ||:
+
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -76,11 +47,11 @@ fi
       <notifyUnstable>false</notifyUnstable>
       <notifyRegression>false</notifyRegression>
       <notifyFailure>true</notifyFailure>
-      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyBackToNormal>true</notifyBackToNormal>
       <notifyRepeatedFailure>false</notifyRepeatedFailure>
       <includeTestSummary>false</includeTestSummary>
       <includeFailedTests>false</includeFailedTests>
-      <commitInfoChoice>NONE</commitInfoChoice>
+      <commitInfoChoice>AUTHORS_AND_TITLES</commitInfoChoice>
       <includeCustomMessage>false</includeCustomMessage>
       <customMessage></customMessage>
       <customMessageSuccess></customMessageSuccess>
@@ -91,15 +62,9 @@ fi
     </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
-      <deleteDirs>false</deleteDirs>
-      <cleanupParameter></cleanupParameter>
-      <externalDelete></externalDelete>
-      <disableDeferredWipeout>false</disableDeferredWipeout>
-    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>40</timeoutMinutes>
+        <timeoutMinutes>5</timeoutMinutes>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>

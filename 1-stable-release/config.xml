@@ -1,38 +1,25 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description></description>
+  <description>This job determines if a new stable release should be created and then triggers a collection of build jobs to build installers for the latest stable release. The trigger job will first trigger this set of build jobs to ensure that the software builds and passes tests before a new release is generated. If all builds complete successfully a new release tag will be applied to the latest commit in the alpha branch and then a second set of build jobs are triggered to publish their installers to the public repositories.</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
-        <daysToKeep>1</daysToKeep>
-        <numToKeep>1</numToKeep>
+        <daysToKeep>7</daysToKeep>
+        <numToKeep>7</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.28.1">
-      <projectUrl>git@github.com:/MDSplus/mdsplus.git/</projectUrl>
-      <displayName></displayName>
-    </com.coravy.hudson.plugins.github.GithubProjectProperty>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <hudson.model.BooleanParameterDefinition>
-          <name>promote</name>
-          <description>Enable this option if you want to promote the stable release to the head of the current alpha branch. This should only be done it the alpha releases have been thoroughly tested in real use to ensure the alpha branch qualifies to become the new stable release.</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.6.4">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.12.1">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
         <refspec>+refs/heads/stable:refs/remotes/origin/stable</refspec>
         <url>git@github.com:/MDSplus/mdsplus.git</url>
-        <credentialsId>35126f42-ed07-43bc-8659-ba2b1484f602</credentialsId>
+        <credentialsId>fb7b254c-f905-4209-9ba7-8160d5585aaa</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -69,33 +56,34 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>H(0-15) 20 * * *</spec>
+      <spec>H(1-15) 17 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
-  <customWorkspace>/mdsplus/jenkins/workspace/1-stable-release</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
       <command>git clean -x -d -f
-if [ &quot;$promote&quot; == &quot;True&quot; ]
-then
-  promote_to=&quot;promote_to=alpha&quot;
-fi
-${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins</command>
+BRANCH=stable ${WORKSPACE}/deploy/trigger.sh --color \
+                               --dockerpull \
+                               --test \
+                               --test_format=log \
+                               --release \
+                               --releasedir=/mdsplus/release \
+                               --publishdir=/mdsplus/dist \
+                               --keys=/mdsplus/certs \
+                               --make_jars=fc25
+</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-              <properties>SRCDIR=$WORKSPACE
-
-
-</properties>
+              <properties>SRCDIR=$WORKSPACE</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
+          <projects>alpine3.6-armhf,alpine3.6-x86,alpine3.6-x86_64,debian_wheezy,debian9-64,fc17,fc18,fc20,fc21,fc22,fc23,fc25,fc26,fc27,fc28,fc29,fc30,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,ubuntu18,windows</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -124,11 +112,11 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
     <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --tag_release --pypi --keys=/mdsplus/certs/jenkins</command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
-      <command>${WORKSPACE}/deploy/trigger.sh --publish --releasedir=/mdsplus/release --publishdir=/mdsplus/dist --keys=/mdsplus/certs/jenkins
-</command>
+      <command>BRANCH=stable ${WORKSPACE}/deploy/trigger.sh --tag_release \
+                               --keys=/mdsplus/certs \
+                               --publish \
+                               --releasedir=/mdsplus/release \
+                               --publishdir=/mdsplus/dist</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
@@ -139,7 +127,44 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>debian_wheezy,fc17,fc18,fc20,fc21,fc22,fc23,fc25,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,windows</projects>
+          <projects>alpine3.6-armhf,alpine3.6-x86,alpine3.6-x86_64,debian_wheezy,debian9-64,fc17,fc18,fc20,fc21,fc22,fc23,fc25,fc26,fc27,fc28,fc29,fc30,macosx,raspberrypi,rhel5,rhel6,rhel7,ubuntu14,ubuntu16,ubuntu18,windows</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>BRANCH=stable</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>2-dockerhub-services</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -169,63 +194,53 @@ ${WORKSPACE}/deploy/trigger.sh --color --dockerpull --release ${promote_to} --re
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.20">
-      <recipients>mdsplus_git@psfc.mit.edu</recipients>
-      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
-      <sendToIndividuals>false</sendToIndividuals>
-    </hudson.tasks.Mailer>
-    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@2.1.1">
-      <credentialId>HipChat-API-Token</credentialId>
-      <room>2361558</room>
-      <notifications>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
-          <notificationType>SUCCESS</notificationType>
-          <color>GREEN</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
-          <notificationType>FAILURE</notificationType>
-          <color>RED</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
-          <notificationType>ABORTED</notificationType>
-          <color>YELLOW</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
-          <notificationType>ABORTED</notificationType>
-          <color>YELLOW</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-        <jenkins.plugins.hipchat.model.NotificationConfig>
-          <notifyEnabled>true</notifyEnabled>
-          <textFormat>false</textFormat>
-          <notificationType>BACK_TO_NORMAL</notificationType>
-          <color>GREEN</color>
-          <messageTemplate></messageTemplate>
-        </jenkins.plugins.hipchat.model.NotificationConfig>
-      </notifications>
-      <startJobMessage></startJobMessage>
-      <completeJobMessage></completeJobMessage>
-    </jenkins.plugins.hipchat.HipChatNotifier>
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.34">
+      <baseUrl>https://mdsplus.slack.com/services/hooks/jenkins-ci/</baseUrl>
+      <teamDomain></teamDomain>
+      <authToken></authToken>
+      <tokenCredentialId>1f90e950-9b04-4b9e-9cd3-a921a61214bc</tokenCredentialId>
+      <botUser>false</botUser>
+      <room>jenkins</room>
+      <sendAsText>false</sendAsText>
+      <iconEmoji></iconEmoji>
+      <username></username>
+      <startNotification>true</startNotification>
+      <notifySuccess>true</notifySuccess>
+      <notifyAborted>true</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>true</notifyUnstable>
+      <notifyRegression>false</notifyRegression>
+      <notifyFailure>true</notifyFailure>
+      <notifyEveryFailure>false</notifyEveryFailure>
+      <notifyBackToNormal>true</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <includeFailedTests>false</includeFailedTests>
+      <commitInfoChoice>AUTHORS_AND_TITLES</commitInfoChoice>
+      <includeCustomMessage>false</includeCustomMessage>
+      <customMessage></customMessage>
+      <customMessageSuccess></customMessageSuccess>
+      <customMessageAborted></customMessageAborted>
+      <customMessageNotBuilt></customMessageNotBuilt>
+      <customMessageUnstable></customMessageUnstable>
+      <customMessageFailure></customMessageFailure>
+    </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
         <timeoutMinutes>90</timeoutMinutes>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.6.2">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
   </buildWrappers>
